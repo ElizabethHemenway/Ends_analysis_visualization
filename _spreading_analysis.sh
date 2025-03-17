@@ -8,12 +8,12 @@
 #SBATCH --mem=42gb                      # memory requested.
 #SBATCH --partition=20                 # partition (queue) to use
 
-# 01/24/2025 - current workflow for TE spreading analysis.
+# 01/24/2025 - current workflow for TE spreading analysis - no kmeans for paper.
 
 #prep
 
-path="/lab/solexa_gehring/elizabeth/TE_spreading/endo_spreading/"
-script_path=$path"scripts/"
+path="/lab/solexa_gehring/elizabeth/ros1_endo_review_analysis/ends_hmaps/"
+script_path="/lab/solexa_gehring/elizabeth/TE_spreading/endo_spreading/scripts/TE_spreading_mC/"
 outpath=$path"slurmout/"
 data=$path"data/"
 regions=$path"regions/"
@@ -43,7 +43,6 @@ done
 
 # filter based on WT value, needs to be methylated TE. 
 thresh=0.1
-mkdir -p $path"sumby_out/"
 
 #$script_path"_filter_sumby.py" $path"sumby_out/" $wt1 $thresh
 #$script_path"_filter_sumby.py" $path"sumby_out/" $wt2 $thresh
@@ -52,9 +51,9 @@ mkdir -p $path"sumby_out/"
 cd $path"sumby_out/"
 #get TE fragments that met threshold ready for ends analysis.
 
-CG="_CG_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
-CHG="_CHG_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
-CHH="_CHH_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
+#CG="_CG_min5_sumby_TE_fragments_greaterthan"$thresh".bed"
+#CHG="_CHG_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
+#CHH="_CHH_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
 
 #bedtools intersect -u -f 1 -a $wt1$CG -b $wt1$CHG > wt_1_TE_fragments_methylated_CG_HG.bed
 #bedtools intersect -u -f 1 -a wt_1_TE_fragments_methylated_CG_HG.bed -b $wt1$CHH > wt_1_TE_fragments_methylated.bed
@@ -74,17 +73,43 @@ CHH="_CHH_min5_sumby_TE_fragments_greaterthan_"$thresh".bed"
 #rm *_12_*
 
 #cp TE_fragments_thresh_mC_wt_allreps.bed $regions
+ 
+#TEthresh="TE_fragments_thresh_mC_wt_allreps.bed"
+
+
+
+r3CG="_CG_min5_sumby_TE_fragments__1kb_r3_hypergreaterthan_"$thresh".bed"
+r3CHG="_CHG_min5_sumby_TE_fragments_1kb_r3_hyper_greaterthan_"$thresh".bed"
+r3CHH="_CHH_min5_sumby_TE_fragments_1kb_r3_hyper_greaterthan_"$thresh".bed"
+
+#bedtools intersect -u -f 1 -a $wt1$r3CG -b $wt1$r3CHG > wt_1_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed
+#bedtools intersect -u -f 1 -a wt_1_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed -b $wt1$r3CHH > wt_1_TE_fragments_1kb_r3_hyper_methylated.bed
+
+#bedtools intersect -u -f 1 -a $wt2$r3CG -b $wt2$r3CHG > wt_2_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed
+#bedtools intersect -u -f 1 -a wt_2_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed -b $wt2$r3CHH > wt_2_TE_fragments_1kb_r3_hyper_methylated.bed
+
+#bedtools intersect -u -f 1 -a $wt3$r3CG -b $wt3$r3CHG > wt_3_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed
+#bedtools intersect -u -f 1 -a wt_3_TE_fragments_1kb_r3_hyper_methylated_CG_HG.bed -b $wt3$r3CHH > wt_3_TE_fragments_1kb_r3_hyper_methylated.bed
+
+#bedtools intersect -u -f 1 -a wt_1_TE_fragments_1kb_r3_hyper_methylated.bed -b wt_2_TE_fragments_1kb_r3_hyper_methylated.bed > wt_12_TE_fragments_1kb_r3_hyper_methylated.bed
+#bedtools intersect -u -f 1 -a wt_12_TE_fragments_1kb_r3_hyper_methylated.bed -b wt_3_TE_fragments_1kb_r3_hyper_methylated.bed > wt_TE_fragments_1kb_r3_hyper_methylated.bed
+
+#bedtools intersect -wa -f 1 -a $regions"TE_fragments_1kb_r3_hyper.bed" -b wt_TE_fragments_1kb_r3_hyper_methylated.bed > TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed
+
+#rm *CG_HG* 
+#rm *_12_*
+
+cp TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed $regions
 
 TEthresh="TE_fragments_thresh_mC_wt_allreps.bed"
+r3TEthresh="TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed"
 
 # run ends analysis on thresh-meeting TEs using all data
 script_path_2='/lab/solexa_gehring/scripts_and_pipelines/updated_scripts/'
 
 cd $path
 #echo $path
-## define contexts from data folder
-#CG=$(find ./data/ -type f -name '*CG*' -print | awk '{gsub(/ /, ""); if (NR > 1) print prev ","; prev=$0} END {print prev}')
-#CGn=$(find ./data/ -type f -name '*CG*' -print | xargs -n 1 basename | awk '{gsub(/ /, ""); if (NR > 1) print prev ","; prev=$0} END {print prev}')
+## define contexts from data folder, I can't get the find commands to work in this context. fix later. 
 
 CGdata=./data/wt_1_Col_spiked_CG_min5.bed,./data/wt_2_Col_spiked_CG_min5.bed,./data/wt_3_Col_spiked_CG_min5.bed,./data/r3_1_Col_spiked_CG_min5.bed,./data/r3_2_Col_spiked_CG_min5.bed,./data/r3_3_Col_spiked_CG_min5.bed
 CGnames=wt_1_Col_spiked_CG_min5.bed,wt_2_Col_spiked_CG_min5.bed,wt_3_Col_spiked_CG_min5.bed,r3_1_Col_spiked_CG_min5.bed,r3_2_Col_spiked_CG_min5.bed,r3_3_Col_spiked_CG_min5.bed
@@ -98,30 +123,58 @@ mkdir -p $endsout
 base=TE_fragments_thresh_mC_wt_allreps
 #echo $endsout$base
 
-$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHH' -i $CHHdata  -n $CHHnames -w 100  -V 6 -M -R 
-$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHG' -i $CHGdata  -n $CHGnames -w 100  -V 6 -M -R 
+#$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHH' -i $CHHdata  -n $CHHnames -w 100  -V 6 -M -R 
+#$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHG' -i $CHGdata  -n $CHGnames -w 100  -V 6 -M -R 
 #$script_path_2'ends_analysis_eah.sh'  -O 2000 -I 2000 -r $regions'TE_fragments_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CG' -i $CGdata -n $CGnames -w 100 -V 6 -M -R 
 
+
+base=TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps
+#echo $endsout$base
+
+#$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHH' -i $CHHdata  -n $CHHnames -w 100  -V 6 -M -R 
+#$script_path_2"ends_analysis_eah.sh"  -O 2000 -I 2000 -r $regions'TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CHG' -i $CHGdata  -n $CHGnames -w 100  -V 6 -M -R 
+#$script_path_2'ends_analysis_eah.sh'  -O 2000 -I 2000 -r $regions'TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps.bed' -o $endsout$base'_TE_CG' -i $CGdata -n $CGnames -w 100 -V 6 -M -R 
+
+
 #cluster methylated TEs by ends analysis data
-$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CG \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_1_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_2_Col_spiked_CG_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_3_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_1_Col_spiked_CG_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_2_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_3_Col_spiked_CG_min5.bed_mat.txt"
+#$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CG \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_1_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_2_Col_spiked_CG_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_r3_3_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_1_Col_spiked_CG_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_2_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CG_wt_3_Col_spiked_CG_min5.bed_mat.txt"
 
-$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CHG \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_1_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_2_Col_spiked_CHG_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_3_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_1_Col_spiked_CHG_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_2_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_3_Col_spiked_CHG_min5.bed_mat.txt"
+#$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CHG \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_1_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_2_Col_spiked_CHG_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_r3_3_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_1_Col_spiked_CHG_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_2_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHG_wt_3_Col_spiked_CHG_min5.bed_mat.txt"
 
-$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CHH \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_1_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_2_Col_spiked_CHH_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_3_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_1_Col_spiked_CHH_min5.bed_mat.txt" \
-$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_2_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_3_Col_spiked_CHH_min5.bed_mat.txt"
+#$script_path"cluster_by_ends_analysis_v2.r" $path 3 r3_minus_Col_threshTEs_CHH \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_1_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_2_Col_spiked_CHH_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_r3_3_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_1_Col_spiked_CHH_min5.bed_mat.txt" \
+#$endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_2_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_thresh_mC_wt_allreps_TE_CHH_wt_3_Col_spiked_CHH_min5.bed_mat.txt"
+
+#cluster methylated TEs by ends analysis data
+$script_path"make_diff_hmaps.r" $path r3_minus_Col_threshTEs_1kb_r3_hyper_CG \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_r3_1_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_r3_2_Col_spiked_CG_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_r3_3_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_wt_1_Col_spiked_CG_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_wt_2_Col_spiked_CG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CG_wt_3_Col_spiked_CG_min5.bed_mat.txt" \
+100
+
+$script_path"make_diff_hmaps.r" $path r3_minus_Col_threshTEs_1kb_r3_hyper_CHG \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_r3_1_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_r3_2_Col_spiked_CHG_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_r3_3_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_wt_1_Col_spiked_CHG_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_wt_2_Col_spiked_CHG_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHG_wt_3_Col_spiked_CHG_min5.bed_mat.txt" \
+40
+
+$script_path"make_diff_hmaps.r" $path r3_minus_Col_threshTEs_1kb_r3_hyper_CHH \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_r3_1_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_r3_2_Col_spiked_CHH_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_r3_3_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_wt_1_Col_spiked_CHH_min5.bed_mat.txt" \
+$endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_wt_2_Col_spiked_CHH_min5.bed_mat.txt" $endsout"TE_fragments_1kb_r3_hyper_thresh_mC_wt_allreps_TE_CHH_wt_3_Col_spiked_CHH_min5.bed_mat.txt" \
+20
 
 
 #make bed files for browsing out of cluster outputs
-$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CG_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CG
-$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CHG_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CHG
-$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CHH_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CHH
+#$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CG_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CG
+#$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CHG_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CHG
+#$script_path"_cluster2bedfiles.py" $path r3_minus_Col_threshTEs_CHH_clusters.csv $regions"TE_fragments.bed" r3_minus_Col_threshTEs_CHH
 
 echo "done!"

@@ -27,4 +27,17 @@ CG=pd.read_csv(path+name+'_CG_min5_sumby_TE_fragments.bed', sep=tab, header=None
 pass_CG=CG[CG['frac_mC']>=min_mC]
 pass_CG.to_csv(path+name+'_CG_min5_sumby_TE_fragments_greaterthan_'+min_mC_str+'.bed', sep=tab, header=None, index=None)
 
+r3CHH=pd.read_csv(path+name+'_CHH_min5_sumby_TE_fragments_1kb_r3_hyper.bed', sep=tab, header=None, names=col)
+pass_r3CHH=r3CHH[r3CHH['frac_mC']>=min_mC]
+pass_r3CHH.to_csv(path+name+'_CHH_min5_sumby_TE_fragments_1kb_r3_hyper_greaterthan_'+min_mC_str+'.bed', sep=tab, header=None, index=None)
+
+r3CHG=pd.read_csv(path+name+'_CHG_min5_sumby_TE_fragments_1kb_r3_hyper.bed', sep=tab, header=None, names=col)
+print(r3CHG)
+pass_r3CHG=r3CHG[r3CHG['frac_mC']>=min_mC]
+pass_r3CHG.to_csv(path+name+'_CHG_min5_sumby_TE_fragments_1kb_r3_hyper_greaterthan_'+min_mC_str+'.bed', sep=tab, header=None, index=None)
+
+r3CG=pd.read_csv(path+name+'_CG_min5_sumby_TE_fragments_1kb_r3_hyper.bed', sep=tab, header=None, names=col)
+pass_r3CG=r3CG[r3CG['frac_mC']>=min_mC]
+pass_r3CG.to_csv(path+name+'_CG_min5_sumby_TE_fragments__1kb_r3_hypergreaterthan_'+min_mC_str+'.bed', sep=tab, header=None, index=None)
+
 print("done!")
